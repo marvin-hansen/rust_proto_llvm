@@ -1,0 +1,24 @@
+# compile proto libraries to python
+load("//.build/bazel/proto:defs.bzl", "fly_proto")
+
+# set default visibility to public
+package(default_visibility = ["//visibility:public"])
+
+fly_proto(
+    name = "sample",
+    srcs = ["sample.proto"],
+    deps = [
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+    ],
+)
+
+# --- GLOBAL ---
+
+fly_proto(
+    name = "proto",
+    deps = [
+        ":sample",
+    ],
+)
+

@@ -1,0 +1,1 @@
+# NOTE: this is left empty as moved to MODULE.bazel (bzlmod)

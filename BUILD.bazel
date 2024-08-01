@@ -1,0 +1,49 @@
+# Copyright © 2024 Radiant Science Inc. All rights reserved.
+
+# load("@aspect_rules_ts//ts:defs.bzl", "ts_config")
+# load("@npm//:defs.bzl", "npm_link_all_packages")
+# load("@npm//:tsconfig-to-swcconfig/package_json.bzl", tsconfig_to_swcconfig = "bin")
+# load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_license//rules:license.bzl", "license")
+
+# NOTE: define the default visibility
+package(default_visibility = ["//scripts/release:__pkg__"])
+
+# define the license and export the license file
+# see: https://bazelbuild.github.io/rules_license/latest.html
+license(
+    name = "license",
+    package_name = "flywheel/system",
+    copyright_notice = "Copyright © 2024 Radiant Science Inc. All rights reserved.",
+    license_kinds = [],
+    license_text = "LICENSE",
+)
+
+exports_files(["LICENSE"])
+
+# java_binary(
+#     name = "bazel-diff",
+#     main_class = "com.bazel_diff.Main",
+#     runtime_deps = ["@bazel_diff//jar"],
+# )
+
+# --- NODE / TYPESCRIPT DEFINITIONS ---
+
+# link all node packages globally (can be referenced with //:node_modules)
+# npm_link_all_packages(name = "node_modules")
+
+# # define global tsconfig
+# ts_config(
+#     name = "tsconfig",
+#     src = "tsconfig.json",
+#     visibility = ["//visibility:public"],
+#     deps = ["//:node_modules/@tsconfig/node18"],
+# )
+
+# tsconfig_to_swcconfig.t2s(
+#     name = "write_swcrc",
+#     srcs = ["tsconfig.json"],
+#     stdout = ".swcrc",
+#     visibility = ["//:__subpackages__"],
+# )
+

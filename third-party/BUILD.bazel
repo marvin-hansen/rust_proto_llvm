@@ -1,0 +1,29 @@
+# load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+
+load("@rules_uv//uv:pip.bzl", compile_pip_requirements="pip_compile")
+
+load("@rules_rust//crate_universe:defs.bzl", "crates_vendor")
+
+
+# can be executed with:
+# bazel run //third-party:req_libs.update
+compile_pip_requirements(
+    name = "req_libs",
+    # env = {
+    #     "FORCE_CMAKE": "1",  # used for llama-cpp (to ensure metal build)
+    #     "CMAKE_ARGS": "-DLLAMA_METAL=on",
+    # },
+    args = ["--allow-unsafe"],
+    requirements_in = "req_libs.txt",
+    requirements_txt = "req_libs.lock.txt",
+)
+
+# create a vendor package for third party packages
+crates_vendor(
+    name = "rust_vendor",
+    cargo_lockfile = ":Cargo.lock",
+    generate_build_scripts = True,
+    manifests = [":Cargo.toml"],
+    mode = "remote",
+    tags = ["manual"],
+)

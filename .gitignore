@@ -1,0 +1,56 @@
+## Ignore checkpoints
+**.ipynb_checkpoints
+**__pycache__
+# **.vscode
+**.pytest_cache
+.DS_Store
+
+.cache
+.cache_*
+.token-oauth
+*/.token-oauth
+.VSCodeCounter
+.mypy_cache
+
+# nodejs
+node_modules
+.aspect/rules/external_repository_action_cache
+
+# static key files
+whoop.ini
+yazio.ini
+yazio_*.ini
+.env
+merged-data*.csv
+
+# azure testing
+__azurite_*.json
+__blobstorage__
+__queuestorage__
+
+# ignore data folder in azure
+azure/data
+.coverage
+coverage.xml
+
+# python library builds
+.eggs
+*.egg-info
+
+# exclude deploy folder
+deploy/*
+
+# add bazel elements
+bazel-*
+
+# Entries below this point are managed by Please (DO NOT EDIT)
+plz-out
+.plzconfig.local
+
+# ignore build model
+build_model/*
+build_stats/*
+build/*
+
+# dora outputs
+**/outputs_complex/*

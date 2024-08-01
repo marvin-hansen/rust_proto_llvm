@@ -1,0 +1,251 @@
+"""Module file for external dependencies and setup
+
+This is part of the BzlMod System.
+Copyright (c) 2024 Felix Geilert
+"""
+
+# --- DEFINITIONS ---
+
+module(
+    name = "flywheel",
+    version = "0.0.1",
+    compatibility_level = 1,
+    repo_name = "com_github_com_radiantscience_flywheel",
+)
+
+# register all platforms
+# register_execution_platforms(
+#     "//.build/platforms:macos-aarch_64",
+#     "//.build/platforms:linux-x86_64",
+#     "//.build/platforms:linux-x86_64-gpu",
+#     "//.build/platforms:windows-x86_64",
+#     "//.build/platforms:windows-x86_64-gpu",
+#     "//.build/platforms:windows-aarch_64",
+# )
+
+# --- IMPORTS ---
+
+http_jar = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_jar")
+
+# --- BAZEL BUILD HELPER ---
+
+# allows to generates diffs for selective build
+http_jar(
+    name = "bazel_diff",
+    urls = [
+        "https://github.com/Tinder/bazel-diff/releases/download/7.0.0/bazel-diff_deploy.jar",
+    ],
+    sha256 = "0b9e32f9c20e570846b083743fe967ae54d13e2a1f7364983e0a7792979442be",
+)
+
+bazel_dep(name = "rules_license", version = "0.0.8")
+bazel_dep(name = "bazel_skylib", version = "1.6.1")
+
+# gazelle helps build rules for Bazel
+bazel_dep(name = "gazelle", version = "0.36.0")
+
+# load platforms
+bazel_dep(name = "platforms", version = "0.0.10")
+
+# --- LANG - PROTOBUF ---
+
+# https://github.com/bazelbuild/rules_proto/releases
+bazel_dep(name = "rules_proto", version = "6.0.2")
+proto_ver = "27.1"
+
+bazel_dep(name = "toolchains_protoc", version = "0.3.1")
+protoc = use_extension("@toolchains_protoc//protoc:extensions.bzl", "protoc")
+protoc.toolchain(
+    google_protobuf = "com_google_protobuf",
+    version = "v" + proto_ver,
+)
+use_repo(protoc, "com_google_protobuf", "toolchains_protoc_hub")
+register_toolchains("@toolchains_protoc_hub//:all")
+
+# NOTE: register all toolchains
+register_toolchains(
+    "//.build/toolchains/...",
+    dev_dependency = True,
+)
+
+# --- LANG - PYTHON ---
+
+# main variables
+# rule_py_ver = "0.31.0"
+rule_py_ver = "0.34.0"
+py_ver = "3.11"
+
+bazel_dep(name = "rules_python", version = rule_py_ver)
+# rules_uv is a drop-in replacement for pip that is faster
+bazel_dep(name = "rules_uv", version = "0.21.0", dev_dependency = True)
+
+# NOTE: gazelle support as outline: https://github.com/bazelbuild/rules_python/tree/main/gazelle
+bazel_dep(name = "rules_python_gazelle_plugin", version = rule_py_ver)
+
+# init python toolchain
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    configure_coverage_tool = True,
+    # is_default = True,  # required if multiple versions specified
+    python_version = py_ver,
+)
+
+# load pip installation moduels
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+# NOTE: this replaces the previous patch semantics to avoid cycles
+# see: https://rules-python.readthedocs.io/en/latest/pypi-dependencies.html
+exp_cycles = {
+    "sphinx": [
+        "sphinx",
+        "sphinxcontrib-serializinghtml",
+        "sphinxcontrib-qthelp",
+        "sphinxcontrib-htmlhelp",
+        "sphinxcontrib-devhelp",
+        "sphinxcontrib-applehelp",
+    ],
+    # DEBT: this only works on linux systems (as it force-injects triton) [LIN:MED-517]
+    # Might create a platform dep?
+    # https://bazel.build/extending/platforms
+    # "torch": [
+    #     "torch",
+    #     "triton",
+    # ],
+}
+
+# NOTE: docs are here: https://rules-python.readthedocs.io/en/latest/api/extensions/pip.html
+pip_timeout = 1200
+pip.parse(
+    experimental_requirement_cycles = exp_cycles,
+    hub_name = "pydeps_libs",
+    python_version = py_ver,
+    requirements_lock = "//third-party:req_libs.lock.txt",
+    timeout = pip_timeout,
+)
+use_repo(pip,  "pydeps_libs")
+
+# --- LANG - NODE / JS ---
+
+# bazel_dep(name = "aspect_rules_js", version = "1.41.2")
+# bazel_dep(name = "aspect_rules_ts", version = "2.2.0")
+# bazel_dep(name = "aspect_rules_esbuild", version = "0.19.0")
+# bazel_dep(name = "aspect_rules_swc", version = "1.2.2")
+
+# # node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
+# # node.toolchain(node_version = "16.14.2")
+
+# npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
+
+# # NOTE: see docs here: https://docs.aspect.build/rulesets/aspect_rules_js/docs/pnpm/#rules-overview
+# npm.npm_translate_lock(
+#     name = "npm",
+#     data = [
+#         "//:pnpm-workspace.yaml",
+#         "//:package.json",
+#         "//flywheel/infra/services/graphql-server:package.json",
+#         "//internal/vscode/flymark:package.json",
+#     ],
+#     npmrc = "//:.npmrc",
+#     pnpm_lock = "//:pnpm-lock.yaml",
+#     # NOTE: this will auto-generate the lock-file
+#     update_pnpm_lock = True,
+#     verify_node_modules_ignored = "//:.bazelignore",
+# )
+# use_repo(npm, "npm")
+
+# rules_ts_ext = use_extension(
+#     "@aspect_rules_ts//ts:extensions.bzl",
+#     "ext",
+#     dev_dependency = True,
+# )
+
+# # NOTE: define the typescript version globally
+# rules_ts_ext.deps(ts_version_from = "//:package.json")
+
+# use_repo(rules_ts_ext, "npm_typescript")
+
+# --- LANG - JAVA ---
+
+bazel_dep(name = "rules_java", version = "7.6.1")
+
+# --- LANG - RUST ---
+
+bazel_dep(name = "rules_rust", version = "0.48.0")
+
+# >>> LLVM Toolchain <<<
+# https://github.com/bazel-contrib/toolchains_llvm
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+
+# LLVM Versions and platforms
+# https://github.com/bazel-contrib/toolchains_llvm/blob/master/toolchain/internal/llvm_distributions.bzl
+# NOTE: resolves to
+# https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/clang%2Bllvm-17.0.6-arm64-apple-darwin22.0.tar.xz
+LLVM_VERSIONS = {
+    "": "15.0.0",
+    # "": "17.0.6",
+    # "": "16.0.0",
+    # NOTE: used to define platform specifics
+    "darwin-aarch64": "16.0.3",
+    # "darwin-x86_64": "15.0.7",
+}
+
+# Host LLVM toolchain.
+llvm.toolchain(
+    name = "llvm_toolchain",
+    llvm_versions = LLVM_VERSIONS,
+)
+# register the toolchain
+use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
+register_toolchains("@llvm_toolchain//:all")
+
+# >>>>>>>
+
+# define the exact toolchain
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",  # NOTE: 2024 is released in 1.86.0
+    versions = [
+        "1.80.0",
+    ],
+    # extra_target_triples = [
+    #     "aarch64-unknown-linux-gnu",
+    #     "x86_64-unknown-linux-gnu",
+    # ],
+)
+# register all rust toolchains
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
+
+# Proto toolchain & Prost Toolchain
+register_toolchains("@rules_rust//proto/protobuf:default-proto-toolchain")
+# NOTE: prost generates more idomatic rust code
+register_toolchains("@//.build/toolchains/rust_prost")
+
+# Crates fully transient (Cargo.toml / Cargo.lock as source of truth).
+crate = use_extension(
+    "@rules_rust//crate_universe:extension.bzl",
+    "crate",
+)
+
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//third-party:Cargo.lock",
+    manifests = ["//third-party:Cargo.toml"],
+)
+use_repo(crate, "crates")
+# crate.annotation(
+#     additive_build_file = "//:anyhow.BUILD.bazel",
+#     crate = "anyhow",
+#     # Defined in additive_build_file.
+#     data = [":cargo_toml"],
+#     # Optional, you probably don't need this. Defaults to all from_cargo
+#     # invocations in this module.
+#     repositories = ["crates"],
+#     # Optional, you probably don't need this, defaults to "*".
+#     version = "*",
+# )
+
+# --- PACKAGING ---
+
+bazel_dep(name = "rules_pkg", version = "0.10.1")

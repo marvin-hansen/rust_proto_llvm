@@ -1,0 +1,4 @@
+# NOTE: this requires manual adding of all elements
+node_modules
+flywheel/infra/services/graphql-server/node_modules
+internal/vscode/flymark/node_modules

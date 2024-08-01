@@ -1,0 +1,23 @@
+# Example of a Rust Library that creates a package to be used in Python
+# Copyright (c) 2024 Radiant Science Inc.
+
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "hello_lib",
+    srcs = ["hello_lib.rs"],
+    deps = [
+        "//samples/proto:proto.rs",
+    ],
+)
+
+rust_binary(
+    name = "hello_world",
+    srcs = ["hello_world.rs"],
+    deps = [
+        ":hello_lib",
+        "@crates//:anyhow",
+    ],
+)

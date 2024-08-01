@@ -1,0 +1,37 @@
+"""Basic Python targets.
+
+Copyright (c) 2024 Radiant Science Inc
+"""
+
+load("@pydeps_libs//:requirements.bzl", "requirement")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+load("//.build/bazel/pytest:defs.bzl", "py_test_wrap")
+
+
+py_library(
+    name = "hello_lib",
+    srcs = ["hello_lib.py"],
+    deps = [
+        "//samples/proto:proto.py",
+        requirement("protobuf"),
+    ],
+)
+
+py_binary(
+    name = "hello_world",
+    srcs = ["hello_world.py"],
+    main = "hello_world.py",
+    deps = [
+        ":hello_lib",
+        requirement("numpy"),
+    ],
+)
+
+py_test_wrap(
+    name = "test_lib",
+    srcs = ["tests/test_lib.py"],
+    deps = [
+        ":hello_lib",
+    ],
+)
+

@@ -1,0 +1,6 @@
+# In your BUILD.bazel file
+filegroup(
+    name = "py_meta_script",
+    srcs = ["py_meta_script.sh"],
+    visibility = ["//visibility:public"],
+)
