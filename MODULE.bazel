@@ -51,14 +51,19 @@ bazel_dep(name = "platforms", version = "0.0.10")
 
 # https://github.com/bazelbuild/rules_proto/releases
 bazel_dep(name = "rules_proto", version = "6.0.2")
-proto_ver = "27.1"
 
 bazel_dep(name = "toolchains_protoc", version = "0.3.1")
 protoc = use_extension("@toolchains_protoc//protoc:extensions.bzl", "protoc")
-protoc.toolchain(
-    google_protobuf = "com_google_protobuf",
-    version = "v" + proto_ver,
-)
+
+# proto_ver = "27.2"
+#protoc.toolchain(
+#    google_protobuf = "com_google_protobuf",
+#    version = "v" + proto_ver,
+#)
+
+# https://registry.bazel.build/modules/protobuf
+bazel_dep(name = "protobuf", version = "27.2")
+
 use_repo(protoc, "com_google_protobuf", "toolchains_protoc_hub")
 register_toolchains("@toolchains_protoc_hub//:all")
 
@@ -170,7 +175,7 @@ bazel_dep(name = "rules_java", version = "7.6.1")
 
 # --- LANG - RUST ---
 
-bazel_dep(name = "rules_rust", version = "0.48.0")
+bazel_dep(name = "rules_rust", version = "0.47.1")
 
 # >>> LLVM Toolchain <<<
 # https://github.com/bazel-contrib/toolchains_llvm
@@ -223,28 +228,75 @@ register_toolchains("@rules_rust//proto/protobuf:default-proto-toolchain")
 register_toolchains("@//.build/toolchains/rust_prost")
 
 # Crates fully transient (Cargo.toml / Cargo.lock as source of truth).
-crate = use_extension(
-    "@rules_rust//crate_universe:extension.bzl",
-    "crate",
+#crate = use_extension(
+#    "@rules_rust//crate_universe:extension.bzl",
+#    "crate",
+#)
+#
+#crate.from_cargo(
+#    name = "crates",
+#    cargo_lockfile = "//third-party:Cargo.lock",
+#    manifests = ["//third-party:Cargo.toml"],
+#)
+
+###############################################################################
+# R U S T  C R A T E S
+###############################################################################
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+
+# protobufs/gRPC in Rust
+crate.spec(
+    package = "prost",
+    version = "0.13.0",
+)
+crate.spec(
+    default_features = False,
+    package = "prost-types",
+    version = "0.13.0",
+)
+crate.spec(
+    features = ["transport"],
+    package = "tonic",
+    version = "0.12.0",
+)
+crate.spec(
+    package = "tonic-build",
+    version = "0.12.0",
+)
+crate.spec(
+    default_features = False,
+    features = ["transport"],
+    package = "tonic-health",
+    version = "0.12.0",
+)
+crate.spec(
+    package = "protoc-gen-prost",
+    version = "0.3.1",
+)
+crate.annotation(
+    crate = "protoc-gen-prost",
+    gen_binaries = ["protoc-gen-prost"],
+)
+crate.spec(
+    package = "protoc-gen-tonic",
+    version = "0.4.0",
+)
+crate.annotation(
+    crate = "protoc-gen-tonic",
+    gen_binaries = ["protoc-gen-tonic"],
 )
 
-crate.from_cargo(
-    name = "crates",
-    cargo_lockfile = "//third-party:Cargo.lock",
-    manifests = ["//third-party:Cargo.toml"],
+# Other External Crates
+crate.spec(
+    package = "anyhow",
+    version = "1.0",
 )
+
+# Complete crate registration.
+crate.from_specs()
+# use any crate as dependency via "@crates//:name"
+# For example: "@crates//:anyhow"
 use_repo(crate, "crates")
-# crate.annotation(
-#     additive_build_file = "//:anyhow.BUILD.bazel",
-#     crate = "anyhow",
-#     # Defined in additive_build_file.
-#     data = [":cargo_toml"],
-#     # Optional, you probably don't need this. Defaults to all from_cargo
-#     # invocations in this module.
-#     repositories = ["crates"],
-#     # Optional, you probably don't need this, defaults to "*".
-#     version = "*",
-# )
 
 # --- PACKAGING ---
 

@@ -1,0 +1,22 @@
+
+syntax = "proto3";
+
+package samples.proto;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+message SubMessage {
+  bool flag = 1;
+  float value = 2;
+}
+
+message SampleMessage {
+  string name = 1;
+  google.protobuf.Timestamp time = 2;
+  google.protobuf.Duration duration = 3;
+  repeated string tags = 4;
+
+  repeated SubMessage subs = 5;
+  SubMessage meta = 6;
+}

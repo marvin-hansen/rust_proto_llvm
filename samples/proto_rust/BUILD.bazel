@@ -1,0 +1,21 @@
+# compile proto bindings to Rust
+
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_rust//proto/prost:defs.bzl", "rust_prost_library")
+
+proto_library(
+    name = "proto_bindings",
+    srcs = [
+        "sample.proto"
+    ],
+    deps = [
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+    ],
+)
+
+rust_prost_library(
+    name = "rust_proto_bindings",
+    proto = ":proto_bindings",
+    visibility = ["//visibility:public"],
+)

@@ -9,7 +9,7 @@ rust_library(
     name = "hello_lib",
     srcs = ["hello_lib.rs"],
     deps = [
-        "//samples/proto:proto.rs",
+        "//samples/proto_rust:rust_proto_bindings",
     ],
 )
 

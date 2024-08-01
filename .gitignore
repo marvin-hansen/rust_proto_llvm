@@ -12,6 +12,21 @@
 .VSCodeCounter
 .mypy_cache
 
+.idea
+.idea/
+
+
+# Cargo stuff
+/target/
+/target/*
+/target/*.*
+
+# Bazel stuff
+
+/target-bzl/
+/target-bzl/*
+/target-bzl/*.*
+
 # nodejs
 node_modules
 .aspect/rules/external_repository_action_cache

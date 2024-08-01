@@ -12,7 +12,7 @@ py_library(
     name = "hello_lib",
     srcs = ["hello_lib.py"],
     deps = [
-        "//samples/proto:proto.py",
+        # "//samples/radiant_proto:python_proto_bindings.py",
         requirement("protobuf"),
     ],
 )

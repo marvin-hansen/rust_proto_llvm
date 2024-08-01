@@ -1,5 +1,9 @@
 # Helper file to define bazel runtime params
 
+# Don't create bazel-* symlinks in the WORKSPACE directory.
+# Instead, set a prefix and put it in .gitignore
+build --symlink_prefix=target-bzl/
+
 # Make sure that bzlmod are used by default
 common --enable_bzlmod
 

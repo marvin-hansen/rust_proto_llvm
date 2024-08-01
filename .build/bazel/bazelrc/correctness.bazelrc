@@ -29,7 +29,7 @@ test --test_verbose_timeout_warnings
 # [rules_js](https://github.com/aspect-build/rules_js) since npm package are source directories
 # inputs to copy_directory actions.
 # Docs: https://bazel.build/reference/command-line-reference#flag--host_jvm_args
-startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+# startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 
 # Allow exclusive tests to run in the sandbox. Fixes a bug where Bazel doesn't enable sandboxing for
 # tests with `tags=["exclusive"]`.
@@ -66,7 +66,7 @@ build --incompatible_default_to_explicit_init_py
 # attempting to use `glob()` to match files in a subdirectory that is opaque to the current package
 # because it contains a BUILD file. See https://github.com/bazelbuild/bazel/issues/8195.
 # Docs: https://bazel.build/reference/command-line-reference#flag--incompatible_disallow_empty_glob
-common --incompatible_disallow_empty_glob
+# common --incompatible_disallow_empty_glob
 
 # Always download coverage files for tests from the remote cache. By default, coverage files are not
 # downloaded on test result cahce hits when --remote_download_minimal is enabled, making it impossible
